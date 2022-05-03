@@ -6,6 +6,12 @@
 <head runat="server">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title></title>
+
+    <script>
+        function downloadExcel(){
+            alert("액셀 다운!");
+        }
+    </script>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -17,6 +23,7 @@
                 <td>호호</td>
             </tr>
         </table>
+        <button onclick="downloadExcel()">액셀 다운로드</button>
     </form>
 </body>
 </html>
