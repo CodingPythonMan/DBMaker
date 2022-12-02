@@ -267,10 +267,21 @@ PRINT N'Creating Table [dbo].[tGameSiteRoles]...';
 
 GO
 CREATE TABLE [dbo].[tGameSiteRoles] (
-    [Id]   BIGINT         IDENTITY (1, 1) NOT NULL,
-    [Name] NVARCHAR (256) NULL,
+    [Id]               BIGINT         IDENTITY (1, 1) NOT NULL,
+    [Name]             NVARCHAR (256) NULL,
+    [NormalizedName]   NVARCHAR (256) NULL,
+    [ConcurrencyStamp] NVARCHAR (MAX) NULL,
     CONSTRAINT [PK_tGameSiteRoles] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+
+
+GO
+PRINT N'Creating Index [dbo].[tGameSiteRoles].[IX_tGameSiteRoles_NormalizedName]...';
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tGameSiteRoles_NormalizedName]
+    ON [dbo].[tGameSiteRoles]([NormalizedName] ASC) WHERE ([NormalizedName] IS NOT NULL);
 
 
 GO
@@ -279,12 +290,124 @@ PRINT N'Creating Table [dbo].[tGameSiteUsers]...';
 
 GO
 CREATE TABLE [dbo].[tGameSiteUsers] (
-    [Id]           BIGINT         IDENTITY (1, 1) NOT NULL,
-    [UserName]     NVARCHAR (256) NULL,
-    [Email]        NVARCHAR (256) NULL,
-    [PasswordHash] NVARCHAR (MAX) NOT NULL,
-    CONSTRAINT [PK_tGameSiteUsers] PRIMARY KEY CLUSTERED ([Id] ASC)
+    [Id]                   BIGINT             IDENTITY (1, 1) NOT NULL,
+    [UserName]             NVARCHAR (256)     NULL,
+    [NormalizedUserName]   NVARCHAR (256)     NULL,
+    [Email]                NVARCHAR (256)     NULL,
+    [NormalizedEmail]      NVARCHAR (256)     NULL,
+    [EmailConfirmed]       BIT                NULL,
+    [PasswordHash]         NVARCHAR (MAX)     NOT NULL,
+    [SecurityStamp]        NVARCHAR (MAX)     NULL,
+    [ConcurrencyStamp]     NVARCHAR (MAX)     NULL,
+    [PhoneNumber]          NVARCHAR (MAX)     NULL,
+    [PhoneNumberConfirmed] BIT                NULL,
+    [TwoFactorEnabled]     BIT                NOT NULL,
+    [LockoutEnd]           DATETIMEOFFSET (7) NULL,
+    [LockoutEnabled]       BIT                NOT NULL,
+    [AccessFailedCount]    INT                NOT NULL,
+    CONSTRAINT [PK_tGameSiteUsers_] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+
+
+GO
+PRINT N'Creating Index [dbo].[tGameSiteUsers].[IX_tGameSiteUsers_NormalizedEmail]...';
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tGameSiteUsers_NormalizedEmail]
+    ON [dbo].[tGameSiteUsers]([NormalizedEmail] ASC);
+
+
+GO
+PRINT N'Creating Index [dbo].[tGameSiteUsers].[IX_tGameSiteUsers_NormalizedUserName]...';
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tGameSiteUsers_NormalizedUserName]
+    ON [dbo].[tGameSiteUsers]([NormalizedUserName] ASC) WHERE ([NormalizedUserName] IS NOT NULL);
+
+
+GO
+PRINT N'Creating Table [dbo].[tGameSiteUserClaims]...';
+
+
+GO
+CREATE TABLE [dbo].[tGameSiteUserClaims] (
+    [Id]         INT            IDENTITY (1, 1) NOT NULL,
+    [UserId]     BIGINT         NOT NULL,
+    [ClaimType]  NVARCHAR (MAX) NULL,
+    [ClaimValue] NVARCHAR (MAX) NULL,
+    CONSTRAINT [PK_tGameSiteUserClaims] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Index [dbo].[tGameSiteUserClaims].[IX_tGameSiteUserClaims_UserId]...';
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tGameSiteUserClaims_UserId]
+    ON [dbo].[tGameSiteUserClaims]([UserId] ASC);
+
+
+GO
+PRINT N'Creating Table [dbo].[tGameSiteUserLogins]...';
+
+
+GO
+CREATE TABLE [dbo].[tGameSiteUserLogins] (
+    [LoginProvider]       NVARCHAR (450) NOT NULL,
+    [ProviderKey]         NVARCHAR (450) NOT NULL,
+    [ProviderDisplayName] NVARCHAR (MAX) NULL,
+    [UserId]              BIGINT         NOT NULL,
+    CONSTRAINT [PK_tGameSiteUserLogins] PRIMARY KEY CLUSTERED ([LoginProvider] ASC, [ProviderKey] ASC)
+);
+
+
+GO
+PRINT N'Creating Index [dbo].[tGameSiteUserLogins].[IX_tGameSiteUserLogins_UserId]...';
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tGameSiteUserLogins_UserId]
+    ON [dbo].[tGameSiteUserLogins]([UserId] ASC);
+
+
+GO
+PRINT N'Creating Table [dbo].[tGameSiteUserTokens]...';
+
+
+GO
+CREATE TABLE [dbo].[tGameSiteUserTokens] (
+    [UserId]        BIGINT         NOT NULL,
+    [LoginProvider] NVARCHAR (450) NOT NULL,
+    [Name]          NVARCHAR (450) NOT NULL,
+    [Value]         NVARCHAR (MAX) NULL,
+    CONSTRAINT [PK_tGameSiteUserTokens] PRIMARY KEY CLUSTERED ([UserId] ASC, [LoginProvider] ASC, [Name] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [dbo].[tGameSiteRoleClaims]...';
+
+
+GO
+CREATE TABLE [dbo].[tGameSiteRoleClaims] (
+    [Id]         INT            IDENTITY (1, 1) NOT NULL,
+    [RoleId]     BIGINT         NOT NULL,
+    [ClaimType]  NVARCHAR (MAX) NULL,
+    [ClaimValue] NVARCHAR (MAX) NULL,
+    CONSTRAINT [PK_tGameSiteRoleClaims] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
+
+
+GO
+PRINT N'Creating Index [dbo].[tGameSiteRoleClaims].[IX_tGameSiteRoleClaims_RoleId]...';
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tGameSiteRoleClaims_RoleId]
+    ON [dbo].[tGameSiteRoleClaims]([RoleId] ASC);
 
 
 GO
@@ -303,6 +426,42 @@ PRINT N'Creating Foreign Key [dbo].[FK_tGameSiteUserRoles_tGameSiteRoles_RoleId]
 GO
 ALTER TABLE [dbo].[tGameSiteUserRoles]
     ADD CONSTRAINT [FK_tGameSiteUserRoles_tGameSiteRoles_RoleId] FOREIGN KEY ([RoleId]) REFERENCES [dbo].[tGameSiteRoles] ([Id]) ON DELETE CASCADE;
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_tGameSiteUserClaims_tGameSiteUsers_UserId]...';
+
+
+GO
+ALTER TABLE [dbo].[tGameSiteUserClaims]
+    ADD CONSTRAINT [FK_tGameSiteUserClaims_tGameSiteUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tGameSiteUsers] ([Id]) ON DELETE CASCADE;
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_tGameSiteUserLogins_tGameSiteUsers_UserId]...';
+
+
+GO
+ALTER TABLE [dbo].[tGameSiteUserLogins]
+    ADD CONSTRAINT [FK_tGameSiteUserLogins_tGameSiteUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tGameSiteUsers] ([Id]) ON DELETE CASCADE;
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_tGameSiteUserTokens_tGameSiteUsers_UserId]...';
+
+
+GO
+ALTER TABLE [dbo].[tGameSiteUserTokens]
+    ADD CONSTRAINT [FK_tGameSiteUserTokens_tGameSiteUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [dbo].[tGameSiteUsers] ([Id]) ON DELETE CASCADE;
+
+
+GO
+PRINT N'Creating Foreign Key [dbo].[FK_tGameSiteRoleClaims_tGameSiteRoles_RoleId]...';
+
+
+GO
+ALTER TABLE [dbo].[tGameSiteRoleClaims]
+    ADD CONSTRAINT [FK_tGameSiteRoleClaims_tGameSiteRoles_RoleId] FOREIGN KEY ([RoleId]) REFERENCES [dbo].[tGameSiteRoles] ([Id]) ON DELETE CASCADE;
 
 
 GO

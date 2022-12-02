@@ -70,6 +70,10 @@
     <Build Include="dbo\Tables\tGameSiteUsers.sql" />
     <Build Include="dbo\Tables\tGameUserSiteRoles.sql" />
     <Build Include="dbo\Tables\tGameSiteRoles.sql" />
+    <Build Include="dbo\Tables\tGameSiteRoleClaims.sql" />
+    <Build Include="dbo\Tables\tGameSiteUserClaims.sql" />
+    <Build Include="dbo\Tables\tGameSiteUserLogins.sql" />
+    <Build Include="dbo\Tables\tGameSiteUserTokens.sql" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>xcopy /y /e $(ProjectDir)$(OutputPath)$(TargetName)_Create.sql $(ProjectDir)..\Script\</PostBuildEvent>
